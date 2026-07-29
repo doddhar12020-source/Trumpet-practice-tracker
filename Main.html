@@ -1,0 +1,258 @@
+<html>
+
+<head>
+    <title>Trumpet Practice Tracker</title>
+
+
+
+    <style>
+        h1 {
+            color: #B5A642;
+            font-size: 50px;
+            text-align: center;
+        }
+
+
+        h4 {
+            font-size: 19px;
+            text-align: left;
+            max-width: 1000px;
+            font-weight: normal;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+
+        .p1 {
+            font: arial;
+
+            text-align: left;
+            font-size: 18px;
+        }
+
+        .p3 {
+            font-style: arial;
+
+            text-align: left;
+            font-size: 18px;
+
+
+
+
+        }
+
+        .timeP {
+            font-size: 20px;
+            font-weight: bold;
+            color: red;
+            padding: auto;
+
+
+        }
+
+        #practiceDuration {
+            border-color: red;
+            border-radius: 12px;
+
+
+        }
+
+
+        .dateS {
+            text-align: left;
+            color: darkgreen;
+            font-weight: bold;
+            font-size: 20px;
+
+        }
+
+        .dateS1 {
+            width: 250px;
+        }
+
+        .notess {
+            color: blue;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 0px;
+        }
+
+        input {
+            width: 250px;
+        }
+
+        button {
+            width: 250px;
+            font-size: 17px;
+            font-weight: 200;
+        }
+
+        img {
+            width: 300px;
+            top: 100px;
+            right: 50px;
+        }
+
+        div {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+
+        }
+    </style>
+
+</head>
+
+
+<body>
+    <h1>Trumpet Tracker</h1> <!-- title -->
+
+
+    <h4>
+        This is a trumpet practice tracker. Keeping track of your playing and your progress is hard, but that is the
+        purpose of this app. Its main goal is to ensure to keep track of all your practice time and make sure you
+        improve and stay confident in your progress.
+    </h4>
+
+
+    <div>
+        <!-- Form -->
+        <form id="practiceForm">
+            <label class="timeP" for="practiceDuration">Time Practised (minutes)</label>
+            <input step="0.01" type="number" id="practiceDuration" name="practiceDuration" required min="0" max="720">
+            <label class="dateS">Date of practice session</label>
+            <input class="dateS1" type="date" name="dateSession" required min="2026-01-01">
+            <label class="notess" for="notes">Write some comments about your practice session</label>
+            <textarea id="notes" name="notes"></textarea>
+            <button type="submit">Add to save session</button>
+
+            <p class="p1">
+                Your total time spent playing is: <span id="totalTime"></span>min
+            </p>
+
+
+            <p id="yesterday" class="p2">
+            </p>
+
+
+            <p class="p3">
+                The time left for you to complete your goal is <span id="left"></span>hours
+            </p>
+            <p>
+                Today you have practiced for <span id="todayTime"></span>min
+            </p>
+
+        </form>
+        <img src="trumpetpic.jpeg">
+    </div>
+
+
+    <script>
+        //aray
+        let completedSessions = [];
+        if (localStorage.getItem("sessions") !== null) {
+            completedSessions = localStorage.getItem("sessions")
+            completedSessions = JSON.parse(completedSessions);
+            for (let i = 0; i < completedSessions.length; i++) {
+                completedSessions[i].date = new Date(completedSessions[i].date)
+            }
+        }
+        let todayTime = 0
+        let sumTime = 0
+        let timeLeft = 50
+        const setGoal = 50
+        const form = document.getElementById("practiceForm");
+        form.addEventListener("submit", addPractice);
+
+        sessionCalculation()
+
+
+        function addPractice(event) {
+            event.preventDefault(); //Prevents the page refreshing on submit
+
+            //Get the values from the form
+            let duration_from_form = form.practiceDuration.value;
+            let date = form.dateSession.value;
+            let notes = form.notes.value;
+
+
+            //Parse the values
+            duration_from_form = Number.parseFloat(duration_from_form)
+            date = new Date(date)
+
+            //Store the values
+            completedSessions.push({
+                duration: duration_from_form,
+                date: date,
+                notes: notes,
+            })
+
+
+            //Calculations
+            sessionCalculation();
+
+            //Update the DOM
+            document.getElementById("totalTime").textContent = sumTime;
+            document.getElementById("left").textContent = timeLeft;
+
+
+            localStorage.setItem("sessions", JSON.stringify(completedSessions));
+        }
+
+
+
+        function sessionCalculation() {
+            todayTime = 0
+            sumTime = 0
+            let today = new Date();
+            for (let i = 0; i < completedSessions.length; i++) {
+                sumTime = sumTime + completedSessions[i].duration; //sumTime
+
+                // getting the date, month and year
+                if (completedSessions[i].date.getDate() === today.getDate() &&
+                    completedSessions[i].date.getMonth() === today.getMonth() &&
+                    completedSessions[i].date.getFullYear() === today.getFullYear()
+                )
+                //calculating the time spent today
+                {
+                    todayTime = todayTime + completedSessions[i].duration;
+                }
+
+                //checking if user played yesterday
+                today.setHours(0, 0, 0, 0)
+                const yesterday = new Date(today)
+                yesterday.setDate(today.getDate() - 1)
+                const sessionDate = completedSessions[i].date
+                sessionDate.setHours(0, 0, 0, 0)
+                if (sessionDate.getTime() === yesterday.getTime()) {
+                    document.getElementById("yesterday").textContent = "Contgrats! You have practiced yesterday. Keep going!";
+                }
+
+
+            }
+
+
+
+            //calculating timLeft
+            timeLeft = 50 - (sumTime / 60);
+            document.getElementById("todayTime").textContent = todayTime
+        }
+
+        //Update the DOM
+        document.getElementById("totalTime").textContent = sumTime;
+        document.getElementById("left").textContent = timeLeft;
+
+
+
+    </script>
+</body>
+
+
+</html>
