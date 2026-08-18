@@ -126,19 +126,27 @@
         <!-- Form -->
         <form id="practiceForm">
             <label class="timeP" for="practiceDuration">Time Practised (minutes)</label>
-            <input step="0.01" type="number" id="practiceDuration" name="practiceDuration" required min="0" max="720">
+            <!-- <input step="0.01" type="number" id="practiceDuration" name="practiceDuration" required min="0" max="720"> -->
+
             <label class="dateS">Date of practice session</label>
             <input class="dateS1" type="date" name="dateSession" required min="2026-01-01">
             <label class="notess" for="notes">Write some comments about your practice session</label>
             <textarea id="notes" name="notes"></textarea>
             <button type="submit">Add to save session</button>
+            <label for="skills">Skills</label>
+            <select name="skills" id="skills">
+                <option value="double_tounging">Double tounging</option>
+                <option value="triple_tounging">Triple tounging</option>
+                <option value="staccato">Staccato</option>
+            </select>
 
             <p class="p1">
                 Your total time spent playing is: <span id="totalTime"></span>min
             </p>
 
 
-            <p id="yesterday" class="p2">
+            <p id="yesterday" "p2">
+                You are on streak: <span id="streak"> </span>
             </p>
 
 
@@ -164,6 +172,7 @@
                 completedSessions[i].date = new Date(completedSessions[i].date)
             }
         }
+        let streak = 0
         let todayTime = 0
         let sumTime = 0
         let timeLeft = 50
@@ -212,6 +221,10 @@
             todayTime = 0
             sumTime = 0
             let today = new Date();
+
+            //sort them in order of the date with the most recent first
+            completedSessions.sort(function (a, b) { return b.date.getTime() - a.date.getTime() })
+
             for (let i = 0; i < completedSessions.length; i++) {
                 sumTime = sumTime + completedSessions[i].duration; //sumTime
 
@@ -220,36 +233,56 @@
                     completedSessions[i].date.getMonth() === today.getMonth() &&
                     completedSessions[i].date.getFullYear() === today.getFullYear()
                 )
+
+
                 //calculating the time spent today
                 {
                     todayTime = todayTime + completedSessions[i].duration;
                 }
-
-                //checking if user played yesterday
-                today.setHours(0, 0, 0, 0)
-                const yesterday = new Date(today)
-                yesterday.setDate(today.getDate() - 1)
-                const sessionDate = completedSessions[i].date
-                sessionDate.setHours(0, 0, 0, 0)
-                if (sessionDate.getTime() === yesterday.getTime()) {
-                    document.getElementById("yesterday").textContent = "Contgrats! You have practiced yesterday. Keep going!";
-                }
-
-
             }
 
+            let latestDate = 0;
+            let i = 0;
+            streak = 0;
 
+            today.setHours(0, 0, 0, 0)
+            const yesterday = new Date(today)
+            yesterday.setDate(today.getDate() - 1)
+            let sessionDate = completedSessions[i].date
+            sessionDate.setHours(0, 0, 0, 0)
+            if (sessionDate.getTime() >= yesterday.getTime()) {
+                latestDate = sessionDate;
+                streak = streak + 1;
+                i = i + 1;
+            }
+
+            while (i >= 1 && i < completedSessions.length) {
+                console.log("while loop starts")
+                sessionDate = completedSessions[i].date
+                sessionDate.setHours(0, 0, 0, 0)
+                let dayBefore = new Date(latestDate)
+                dayBefore.setDate(latestDate.getDate() - 1)
+                if (sessionDate.getTime() === latestDate.getTime()) {
+                    i = i + 1;
+                }
+                else if (sessionDate.getTime() === dayBefore.getTime()) {
+                    streak = streak + 1;
+                    latestDate = sessionDate;
+                    i = i + 1;
+                }
+                else {
+                    break;
+                }
+            }
 
             //calculating timLeft
             timeLeft = 50 - (sumTime / 60);
             document.getElementById("todayTime").textContent = todayTime
+            //Update the DOM
+            document.getElementById("totalTime").textContent = sumTime;
+            document.getElementById("left").textContent = timeLeft;
+            document.getElementById("streak").textContent = streak;
         }
-
-        //Update the DOM
-        document.getElementById("totalTime").textContent = sumTime;
-        document.getElementById("left").textContent = timeLeft;
-
-
 
     </script>
 </body>
