@@ -130,7 +130,7 @@
             <input type="range" id="practiceDuration" name="practiceDuration" value="30" step="5" required min="5"
                 max="240">
             <label class="dateS">Date of practice session</label>
-            <input class="dateS1" type="date" name="dateSession" required min="2026-01-01">
+            <input class="dateS1" type="date" name="dateSession" required min="2026-01-01" value="">
             <label class="notess" for="notes">Write some comments about your practice session</label>
             <textarea id="notes" name="notes"></textarea>
             <label for="skills">Skills</label>
@@ -162,9 +162,20 @@
         <img src="trumpetpic.jpeg">
     </div>
 
+    <form id="createSkillsForm" name="createSkillsForm">
+        <input type="text" id="createSkillsInput" name="createSkillsInput">
+        <button type="submit">Create New Skill</button>
+
+    </form>
+
 
     <script>
         //aray
+        let createdSkills = [];
+        if (localStorage.getItem("skills") !== null) {
+            createdSkills = JSON.parse(localStorage.getItem("skills"));
+        }
+
         let completedSessions = [];
         if (localStorage.getItem("sessions") !== null) {
             completedSessions = localStorage.getItem("sessions")
@@ -180,14 +191,26 @@
         const setGoal = 50
         const form = document.getElementById("practiceForm");
         const practiceDuration = document.getElementById("practiceDuration");
-        form.addEventListener("submit", addPractice);
-        practiceDuration.addEventListener("input", timeSelection)
         const rangeNumber = document.getElementById("rangeNumber");
+        const createSkillsForm = document.getElementById("createSkillsForm");
+        form.addEventListener("submit", addPractice);
+        practiceDuration.addEventListener("input", timeSelection);
+        createSkillsForm.addEventListener("submit", skillCreation);
+
+        form.dateSession.valueAsDate = new Date()
+
 
         function timeSelection(event) {
             rangeNumber.textContent = practiceDuration.value;
         }
 
+        function skillCreation(event) {
+            event.preventDefault();
+            createdSkills.push(createSkillsForm.createSkillsInput.value);
+            localStorage.setItem("skills", JSON.stringify(createdSkills));
+            createSkillsForm.createSkillsInput.value = ""
+
+        }
 
         sessionCalculation()
 
@@ -214,6 +237,7 @@
                 date: date,
                 notes: notes,
                 skill: skill,
+
             })
 
 
@@ -226,9 +250,8 @@
 
 
             localStorage.setItem("sessions", JSON.stringify(completedSessions));
+            form.notes.value = ""
         }
-
-
 
         function sessionCalculation() {
             todayTime = 0
