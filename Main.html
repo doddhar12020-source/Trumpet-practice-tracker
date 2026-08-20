@@ -12,7 +12,6 @@
             text-align: center;
         }
 
-
         h4 {
             font-size: 19px;
             text-align: left;
@@ -24,57 +23,9 @@
             margin: 5px 0;
         }
 
-        .p1 {
-            font: arial;
-
-            text-align: left;
-            font-size: 18px;
-        }
-
-        .p3 {
-            font-style: arial;
-
-            text-align: left;
-            font-size: 18px;
-
-
-
-
-        }
-
-        .timeP {
-            font-size: 20px;
-            font-weight: bold;
-            color: red;
-            padding: auto;
-
-
-        }
-
         #practiceDuration {
             border-color: red;
             border-radius: 12px;
-
-
-        }
-
-
-        .dateS {
-            text-align: left;
-            color: darkgreen;
-            font-weight: bold;
-            font-size: 20px;
-
-        }
-
-        .dateS1 {
-            width: 250px;
-        }
-
-        .notess {
-            color: blue;
-            font-size: 20px;
-            font-weight: bold;
         }
 
         form {
@@ -125,33 +76,38 @@
     <div>
         <!-- Form -->
         <form id="practiceForm">
-            <label class="timeP" for="practiceDuration">Time Practised (minutes): <span
-                    id="rangeNumber">30</span></label>
+            <label id="timeP" for="practiceDuration">Time Practised (minutes):<span id="rangeNumber">30</span></label>
             <input type="range" id="practiceDuration" name="practiceDuration" value="30" step="5" required min="5"
                 max="240">
-            <label class="dateS">Date of practice session</label>
-            <input class="dateS1" type="date" name="dateSession" required min="2026-01-01" value="">
-            <label class="notess" for="notes">Write some comments about your practice session</label>
+
+            <label>Date of practice session</label>
+            <input id="dateSession" type="date" name="dateSession" required min="2026-01-01" value="">
+
+            <label for="notes">Write some comments about your practice session</label>
             <textarea id="notes" name="notes"></textarea>
+
             <label for="skills">Skills</label>
-            <select name="skills" id="skills">
-                <option value="double_tounging">Double tounging</option>
-                <option value="triple_tounging">Triple tounging</option>
-                <option value="staccato">Staccato</option>
-            </select>
+            <div style="justify-content: flex-start;">
+                <select name="skills" id="skills" style="width: 330px;">
+                    <option value="double_tounging">Double tounging</option>
+                    <option value="triple_tounging">Triple tounging</option>
+                    <option value="staccato">Staccato</option>
+                </select>
+                <button type="button" id="plusButton" style="width: 30px;">+</button>
+            </div>
             <button type="submit">Add to save session</button>
 
-            <p class="p1">
+            <p>
                 Your total time spent playing is: <span id="totalTime"></span>min
             </p>
 
 
-            <p id="yesterday" "p2">
-                You are on streak: <span id="streak"> </span>
+            <p id="yesterday">
+                You are on streak: <span id="streak"></span>
             </p>
 
 
-            <p class="p3">
+            <p>
                 The time left for you to complete your goal is <span id="left"></span>hours
             </p>
             <p>
@@ -161,13 +117,13 @@
         </form>
         <img src="trumpetpic.jpeg">
     </div>
+    <dialog id="skillsDialog">
+        <form id="createSkillsForm" name="createSkillsForm">
+            <input type="text" id="createSkillsInput" name="createSkillsInput">
+            <button type="submit">Create New Skill</button>
 
-    <form id="createSkillsForm" name="createSkillsForm">
-        <input type="text" id="createSkillsInput" name="createSkillsInput">
-        <button type="submit">Create New Skill</button>
-
-    </form>
-
+        </form>
+    </dialog>
 
     <script>
         //aray
@@ -189,15 +145,27 @@
         let sumTime = 0
         let timeLeft = 50
         const setGoal = 50
+
         const form = document.getElementById("practiceForm");
-        const practiceDuration = document.getElementById("practiceDuration");
-        const rangeNumber = document.getElementById("rangeNumber");
-        const createSkillsForm = document.getElementById("createSkillsForm");
         form.addEventListener("submit", addPractice);
+        form.dateSession.valueAsDate = new Date()
+
+        const practiceDuration = document.getElementById("practiceDuration");
         practiceDuration.addEventListener("input", timeSelection);
+
+        const rangeNumber = document.getElementById("rangeNumber");
+
+        const createSkillsForm = document.getElementById("createSkillsForm");
         createSkillsForm.addEventListener("submit", skillCreation);
 
-        form.dateSession.valueAsDate = new Date()
+
+        const plusButton = document.getElementById("plusButton");
+        const skillsDialog = document.getElementById("skillsDialog");
+        plusButton.addEventListener("click", function () {
+            skillsDialog.showModal()
+        });
+
+
 
 
         function timeSelection(event) {
@@ -209,6 +177,7 @@
             createdSkills.push(createSkillsForm.createSkillsInput.value);
             localStorage.setItem("skills", JSON.stringify(createdSkills));
             createSkillsForm.createSkillsInput.value = ""
+            skillsDialog.close()
 
         }
 
